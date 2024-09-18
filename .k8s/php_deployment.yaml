@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php
+  labels:
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: php
+        tier: backend
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: php
+          image: laravel-php
+          imagePullPolicy: Never
+          volumeMounts:
+            - name: code
+              mountPath: /code
+#          lifecycle:
+#            postStart:
+#              exec:
+#                command: [ "/bin/sh", "-c", "cp -r /var/www/html/. /code" ]
+          startupProbe:
+            tcpSocket:
+              port: 9000
+            failureThreshold: 30
+            periodSeconds: 10
+      volumes:
+        - name: code
+          persistentVolumeClaim:
+            claimName: code
